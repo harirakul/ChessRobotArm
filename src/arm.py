@@ -18,8 +18,6 @@ class ChessRobotArm:
         self.a = a #Length of arm a (cm)
         self.b = b #Length of arm b (cm)
 
-        # self.shoulder = 0
-        # self.elbow = 0
         self.verbose = verbose
 
     def wait_until_msg(self, msg: str) -> None:
@@ -174,16 +172,3 @@ if __name__ == '__main__':
         #robot.move(sq[:2], sq[2:4])
         #robot.rest()
         #robot.discard(sq)
-
-    #robot.move('f4', 'c4')
-    #robot.go_to(-1, 1)
-    
-    # ik = robot.inverse_kinematics(x=5+5, y=6)
-    # print(ik)
-    # robot.shoulder_to(ik[0])
-    # robot.elbow_to(ik[1])
-    # robot.rest()
-    #robot.shoulder_to(90)
-    # while True:
-    #     a = input("Square: ") 
-    #     robot.go_to(a)
