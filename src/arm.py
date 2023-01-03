@@ -1,3 +1,5 @@
+#Code for Chess Robot Inverse Kinematics
+
 import math
 import serial
 from time import sleep
@@ -64,6 +66,10 @@ class ChessRobotArm:
     def drop(self) -> None:
         self.command(192)
     
+    def grasp_knight(self) -> None:
+        print("Grabbing knight")
+        self.command(193)
+    
     def base_angle(self, x: float, y: float):
         y += offset/SQUARE_SIZE + 0.3
         
@@ -92,31 +98,57 @@ class ChessRobotArm:
         d = b[0]
         rank = int(square[1])
         vertical_offset = -8 + rank/2.6
-        b_offset = 2
+        b_offset = 1
         s, e = self.inverse_kinematics(vertical_offset, d+rank/10)
-        e-=1
-        s+=4
+        e-=3
+        #s+=2
         if self.verbose:
             print('Base', b)
             print('Shoulder', s-90)
             print('Elbow', e)
 
+        #Square-specific Tuning
         if rank==2:
             e-=1
-            s-=1
-        if square in ('a1', 'b1'):
-            b_offset+=2
-        if square in ['e1', 'd1', 'f1', 'c1', 'b1']:
+        if square in ('h2', 'g2', 'c4', 'g3', 'e5', 'c1', 'f4', 'h1', 'g1', 'd2', 'c2', 'e2', 'f3', 'e4'):
+            s += 0
+            e += 2
+            if square in ('h2', 'g2'):
+                e += 2
+            if square in ('g3', 'c4'):
+                b_offset += 1
+        if square in ('a1', 'b1', 'f3', 'b3'):
+            b_offset+=3
+            if square in ('b1'):
+                e-=4
+        if square in ('d1', 'c1'):
             e -= 8
+        if square in ('e1'):
+            e -=3
+        if square in ('f1', 'c2', 'e3', 'e4'):
+            b_offset += 2
+            if square in ('f1', 'e3'):
+                e -=1
+                b_offset += 1
+                if square in ('f1'):
+                    e-=3
         if square in ['a1', 'a3', 'b3', 'c4', 'c5', 'b5', 'a5', 'c6', 'b6', 'a6', 'a7']:
             e -=2
-        if square in ('d5'):
-            e -=2
-            b_offset-=1
-        if square in ('e2'):
+        if square in ('d5', 'c5', 'b5'):
+            s-=1
+            e -=0
+        if square in ('e2', 'd4', 'c4', 'b4', 'a4', 'd3', 'd2', 'c2'):
             s-=2
-        if square in ('e4', 'c4') or (rank in (5, 6, 7) and square not in ('a5', 'a6')):
+            if square in ('b4'):
+                s-=1
+        if square in ('d4', 'e4', 'a2', 'a4'):
+            b_offset -=2
+        if square in ('b4', 'd4', 'e4', 'c4', 'c2', 'a4', 'd3', 'g1', 'b1') or (rank in (5, 6, 7) and square not in ('a5', 'a6')):
             b_offset += 3   
+            if square in ('c4'):
+                e += 1
+        if square in ('c1'):
+            b_offset += 6
         if square in ('h7', 'g7', 'f7', 'e7'):
             e += 2
             b_offset+=2
@@ -124,24 +156,31 @@ class ChessRobotArm:
             b_offset -=2
         if square in ('d1'):
             b_offset -=3
+        if square in ('d5'):
+            b_offset -=2
         if rank==8:
             e+=4
-            b_offset+=4
+            b_offset+=6
             s += 2
             if square in ('c8', 'b8', 'e8', 'd8', 'a8'):
                 e-=3
             if square in ('a8'):
                 b_offset -=4
+        if square in ('f5'):
+            e += 1
 
         self.base_to(b[1] + b_offset)
         # self.elbow_to(e)
         # self.shoulder_to(s-90)
         self.combo_move(s-90, e)
     
-    def move(self, sq1: str, sq2: str):
+    def move(self, sq1: str, sq2: str, knight=False):
         self.drop()
         self.go_to(sq1)
-        self.grasp()
+        if knight:
+            self.grasp_knight()
+        else:
+            self.grasp()
         self.rest()
         self.go_to(sq2)
         self.drop()
@@ -160,7 +199,7 @@ class ChessRobotArm:
         self.rest()
 
 if __name__ == '__main__':  
-    robot = ChessRobotArm(22, 23, port='COM4', verbose=True)
+    robot = ChessRobotArm(22, 22.5, port='COM4', verbose=True)
 
     while True:
         sq = input()
