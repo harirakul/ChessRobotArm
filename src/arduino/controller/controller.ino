@@ -49,6 +49,10 @@ void loop(){
     if (x == 192){
       drop();
     }
+
+    if (x == 193){
+      graspKnight();
+    }
     
     if (x >= 0 && x <= 180){
       shoulderTo(x);
@@ -60,7 +64,6 @@ void loop(){
       //Serial.println("received shoulder");
       float y = Serial.readString().toFloat();
       if (y >= 0 && y <= 180){
-        Serial.println("k");
         comboMove(y, x-200);
       }
       //elbowTo(x - 200);
@@ -151,13 +154,13 @@ void gripperTo(float target){
   if (pos <= target){
     for (pos = pos; pos <= target; pos += 1){
       gripper.write(pos);
-      delay(20);
+      delay(10);
     }
   }
   else {
     for (pos = pos; pos >= target; pos -= 1){
       gripper.write(pos);
-      delay(20);
+      delay(10);
     }
   }
 }
@@ -214,18 +217,22 @@ void comboMove(float starget, float etarget){
 }
 
 void rest() {
-  comboMove(110, 40);
-  // shoulderTo(110);
-  // elbowTo(40);
+  //comboMove(120, 40);
+  shoulderTo(120);
+  elbowTo(40);
 }
 
 void grasp(){
   //gripper.write(95);
+  gripperTo(75);
+}
+
+void graspKnight(){
   gripperTo(50);
 }
 
 void drop(){
-  gripper.write(120);
-  //gripperTo(57);
+  //gripper.write(120);
+  gripperTo(145);
 }
 
